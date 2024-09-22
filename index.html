@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Infinite Shared Pixel Art Canvas</title>
+    <!-- Font Awesome CDN Link -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <!-- Link to the external CSS file -->
+    <link rel="stylesheet" href="styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+</head>
+<body>
+    <div id="container">
+        <!-- Canvas Map Container -->
+        <div id="canvas-map">
+        </div>
+
+        <!-- Color Palette -->
+        <div id="color-palette">
+            <!-- Clear Colors Button -->
+            <button id="clear-colors" class="clear-button">
+                <i class="fas fa-trash-alt"></i> Clear Colors
+            </button>
+            <!-- Dynamic color swatches will be loaded here -->
+			<div id="color-swatches">
+			</div>
+        </div>
+
+        <!-- Tool Buttons -->
+        <div id="tool-buttons">
+            <button id="pencil-tool" class="tool-button selected" title="Pencil">
+                <i class="fas fa-pencil-alt"></i>
+            </button>
+            <button id="rectangle-tool" class="tool-button" title="Rectangle">
+                <i class="fas fa-vector-square"></i>
+            </button>
+            <button id="flood-fill-tool" class="tool-button" title="Flood Fill">
+                <i class="fas fa-fill-drip"></i>
+            </button>
+            <button id="eraser-tool" class="tool-button" title="Eraser">
+                <i class="fas fa-eraser"></i>
+            </button>
+            <button id="color-picker-tool" class="tool-button" title="Color Picker">
+                <i class="fas fa-eye-dropper"></i>
+            </button>
+        </div>
+
+        <!-- Pencil Size Slider -->
+        <div id="pencil-size-container">
+            <input type="range" id="pencil-size-slider" min="1" max="50" value="6">
+            <span id="pencil-size-display">6</span>
+        </div>
+    </div>
+
+    <!-- Include script.js -->
+    <script src="script.js"></script>
+</body>
+</html>
