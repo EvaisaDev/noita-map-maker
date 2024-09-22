@@ -1,4 +1,5 @@
 // script.js
+// comments written by chatgpt because i am lazy, so they probably make 0 sense lmao
 
 // Constants
 const CANVAS_SIZE = 512; // 512x512 canvases
