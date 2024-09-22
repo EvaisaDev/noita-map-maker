@@ -19,7 +19,7 @@ const clearColorsButton = document.getElementById('clear-colors');
 
 // State Variables
 let currentTool = 'pencil';
-let currentColor = '#FF000000'; // Default color
+let currentColor = argbHexToRgba('ff000042'); // Default color
 let pencilSize = 6;
 let isDrawing = false;
 let currentCanvasObj = null;
@@ -31,9 +31,6 @@ let hoverTimeout = null;
 let lastHoveredPixel = null;
 let disableDrawing = false;
 const canvases = new Map(); // key: 'x|y', value: { canvas, ctx, canvasData, rendered }
-
-// Track loaded materials for clearing
-let loadedMaterials = [];
 
 // Tool Classes
 
@@ -64,7 +61,7 @@ class DrawingTool extends Tool {
         currentCanvasObj = canvasObj;
         const { x, y } = getCanvasCoordinates(e, canvasObj);
         this.lastPosition = { x, y };
-        const drawColor = this.isEraser ? '#000000' : currentColor;
+        const drawColor = this.isEraser ? argbHexToRgba('ff000042') : currentColor;
         this.plotPoint(canvasObj, x, y, drawColor);
     }
 
@@ -82,7 +79,7 @@ class DrawingTool extends Tool {
 
     draw(e, canvasObj) {
         const { x, y } = getCanvasCoordinates(e, canvasObj);
-        const drawColor = this.isEraser ? '#000000' : currentColor;
+        const drawColor = this.isEraser ? argbHexToRgba('ff000042') : currentColor;
 
         if (this.lastPosition && (this.lastPosition.x !== x || this.lastPosition.y !== y)) {
             this.interpolateLine(canvasObj, this.lastPosition.x, this.lastPosition.y, x, y, drawColor);
@@ -93,7 +90,7 @@ class DrawingTool extends Tool {
 
     plotPoint(canvasObj, x, y, drawColor) {
         // Plot within current canvas
-        const adjustedColor = this.isEraser ? '#000000' : drawColor;
+        const adjustedColor = this.isEraser ? argbHexToRgba('ff000042') : drawColor;
         drawPixel(canvasObj, x, y, adjustedColor);
     }
 
@@ -124,7 +121,7 @@ class MarkerTool extends DrawingTool {
 
         const targetColor = getPixelColor(canvasObj, x, y);
         this.extra_data.targetColor = targetColor;
-        const drawColor = this.isEraser ? '#000000' : currentColor;
+        const drawColor = this.isEraser ? argbHexToRgba('ff000042') : currentColor;
         this.plotPoint(canvasObj, x, y, drawColor);
     }
 }
@@ -330,7 +327,7 @@ function drawBrush(ctx, x, y, size, color, canvasId) {
         if (canvasObj.canvasData === undefined) {
             canvasObj.canvasData = {};
             for (let i = 0; i < CANVAS_SIZE * CANVAS_SIZE; i++) {
-                canvasObj.canvasData[i] = "#000000";
+                canvasObj.canvasData[i] = argbHexToRgba("ff000042");
             }
         }
         canvasObj.canvasData[index] = color;
@@ -484,7 +481,7 @@ function getPixelColor(canvasObj, x, y) {
     if (canvasObj.canvasData[key]) {
         return canvasObj.canvasData[key];
     } else {
-        return "#000000";
+        return argbHexToRgba("ff000042");
     }
 }
 
@@ -755,12 +752,14 @@ function positionCanvas(wrapper, x, y) {
  */
 function renderCanvas(canvasObj) {
     const ctx = canvasObj.ctx;
-    ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+	// ctx color
+	ctx.fillStyle = argbHexToRgba("ff000042");
+	ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
     for (let y = 0; y < CANVAS_SIZE; y++) {
         for (let x = 0; x < CANVAS_SIZE; x++) {
             const color = getPixelColor(canvasObj, x, y);
-            if (color !== '#000000') { // Assuming white is the default/empty color
+            if (color !== argbHexToRgba('ff000042')) { // Assuming white is the default/empty color
                 ctx.fillStyle = color;
                 ctx.fillRect(x, y, 1, 1);
             }
@@ -833,9 +832,9 @@ function createCanvasWrapper(x, y, dir = null) {
 
 	// set canvas to black
 	for (let i = 0; i < CANVAS_SIZE * CANVAS_SIZE; i++) {
-		canvasObj.canvasData[i] = "#000000";
+		canvasObj.canvasData[i] = argbHexToRgba("ff000042");
 	}
-	ctx.fillStyle = "#000000";
+	ctx.fillStyle = argbHexToRgba("ff000042");
 	ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
     canvases.set(canvasId, canvasObj);
@@ -1170,9 +1169,7 @@ function loadMaterialsXMLFile(file) {
             const wangColor = material.getAttribute('wang_color');
 
             if (name && wangColor) {
-                const rgbColor = argbToHex(wangColor);
-                createColorSwatch(rgbColor, name);
-                loadedMaterials.push({ name, color: rgbColor });
+                createColorSwatch(wangColor, name);
             }
         });
     };
@@ -1182,16 +1179,14 @@ function loadMaterialsXMLFile(file) {
     reader.readAsText(file);
 }
 
-/**
- * Converts ARGB color format to HEX (#RRGGBB).
- * @param {string} argb - ARGB color string (e.g., "7fFF6060")
- * @returns {string} - HEX color string (e.g., "#FF6060")
- */
-function argbToHex(argb) {
-    if (argb.length !== 8) return '#000000'; // Default to white if invalid
-    const rgb = argb.slice(2); // Remove the first two characters (alpha)
-    return `#${rgb}`;
+function argbHexToRgba(argbHex) {
+	const hex = argbHex.replace('#', '');
+	const alpha = parseInt(hex.slice(0, 2), 16) / 255;
+	const rgbHex = hex.slice(2);
+	return `rgba(${parseInt(rgbHex.slice(0, 2), 16)}, ${parseInt(rgbHex.slice(2, 4), 16)}, ${parseInt(rgbHex.slice(4), 16)}, ${alpha})`;
 }
+
+createColorSwatch("FF000000", "none");
 
 /**
  * Creates a color swatch with the given color and name.
@@ -1211,8 +1206,8 @@ function createColorSwatch(color, name) {
 
     const swatch = document.createElement('div');
     swatch.classList.add('color-swatch');
-    swatch.setAttribute('data-color', color);
-    swatch.style.backgroundColor = color;
+    swatch.setAttribute('data-color', argbHexToRgba(color));
+    swatch.style.backgroundColor = argbHexToRgba(color);
 
     const label = document.createElement('span');
     label.classList.add('color-label');
@@ -1293,9 +1288,7 @@ function clearLoadedColors() {
     // Remove all swatch containers except the drop zone and clear button
     const swatchContainers = document.querySelectorAll('.color-swatch-container');
     swatchContainers.forEach(container => container.remove());
-
-    // Reset loaded materials array
-    loadedMaterials = [];
+	createColorSwatch("FF000000", "none");
 }
 
 // Initialize Drag and Drop
