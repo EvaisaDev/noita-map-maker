@@ -176,6 +176,14 @@ body {
     border-color: #2ecc71;
 }
 
+/* fancy text */
+#drag-drop-area {
+	color: #ecf0f1;
+	font-size: 20px;
+	text-align: center;
+	margin-bottom: 10px;
+}
+
 .clear-button {
     background-color: #e74c3c;
     border: none;
